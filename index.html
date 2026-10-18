@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}</style></head><body>
+<title>Inference Practice</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Lexend:wght@400;500;600&display=swap">
+<style>
+/* Layout: a reading workbook — day tabs on top, one short activity card after another, big tap targets. Navy + gold. */
+:root {
+  --bg: #eef1f7; --surface: #ffffff; --surface-2: #f5f2e8; --ink: #15224a; --ink-soft: #55607f; --line: #d3d9e6;
+  --navy: #1b2f6b; --gold: #c9971f; --gold-soft: #f6e7bd; --good: #2f7d5b; --good-bg: #dff1e7; --try: #9a5b12; --try-bg: #fbecd2; --slot: #f7f8fc;
+  --font-display: "Fredoka", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Lexend", "Verdana", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1630; --surface: #16213f; --surface-2: #1d2a4d; --ink: #eef1fa; --ink-soft: #a9b3cf; --line: #2c3a63;
+    --navy: #9fb4f0; --gold: #e8bc4a; --gold-soft: #3b3420; --good: #7fd3a8; --good-bg: #173a2c; --try: #f3c27a; --try-bg: #3a2d17; --slot: #121b36; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1630; --surface: #16213f; --surface-2: #1d2a4d; --ink: #eef1fa; --ink-soft: #a9b3cf; --line: #2c3a63;
+  --navy: #9fb4f0; --gold: #e8bc4a; --gold-soft: #3b3420; --good: #7fd3a8; --good-bg: #173a2c; --try: #f3c27a; --try-bg: #3a2d17; --slot: #121b36; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 48px; }
+.wrap { max-width: 900px; margin: 0 auto; display: grid; gap: 16px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; margin: 0; text-wrap: balance; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+header.top { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+header.top h1 { font-size: 28px; color: var(--navy); }
+.spacer { flex: 1; }
+.who { font-size: 15px; color: var(--ink-soft); }
+.linkish { background: none; border: none; color: var(--navy); text-decoration: underline; padding: 4px; font-size: 15px; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 8px 14px; display: grid; text-align: left; min-width: 104px; }
+.tab b { font-family: var(--font-display); font-weight: 600; font-size: 17px; }
+.tab span { font-size: 13px; color: var(--ink-soft); }
+.tab[aria-selected="true"] { background: var(--navy); border-color: var(--navy); color: var(--bg); }
+.tab[aria-selected="true"] span { color: var(--bg); opacity: .85; }
+.tab .done { color: var(--good); }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px 20px; display: grid; gap: 12px; min-width: 0; }
+.card h2 { font-size: 22px; color: var(--navy); }
+.card h3 { font-size: 18px; }
+.step { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-soft); }
+.hint { font-size: 14px; color: var(--ink-soft); margin: 0; }
+.remember { background: var(--gold-soft); border-color: var(--gold); }
+.prog { display: flex; gap: 10px; align-items: center; font-size: 14px; color: var(--ink-soft); }
+.bar { flex: 1; height: 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; max-width: 320px; }
+.bar i { display: block; height: 100%; background: var(--gold); border-radius: 999px; transition: width .4s; }
+.passage-title { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: baseline; }
+.passage p { margin: 0 0 12px; font-size: 19px; line-height: 1.8; }
+.pnum { font-weight: 600; color: var(--gold); margin-right: 6px; }
+.w { border-radius: 5px; padding: 0 1px; cursor: pointer; }
+.w:hover { background: var(--gold-soft); }
+.w.say { background: var(--gold); color: #1b1607; }
+.btn { border: none; border-radius: 12px; padding: 11px 18px; font-family: var(--font-display); font-weight: 600; font-size: 17px; background: var(--navy); color: var(--bg); min-height: 44px; }
+.btn.quiet { background: var(--surface-2); color: var(--ink); border: 1px solid var(--line); }
+.btn.gold { background: var(--gold); color: #1b1607; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+input[type="text"], input[type="password"], input[type="url"], textarea, select { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--bg); min-width: 0; }
+textarea { min-height: 90px; }
+label.q { display: grid; gap: 6px; font-weight: 500; }
+/* drag & drop */
+.bank { display: flex; flex-wrap: wrap; gap: 10px; min-height: 60px; padding: 10px; border-radius: 14px; background: var(--slot); border: 1.5px dashed var(--line); }
+.bank.empty::after { content: "All placed!"; color: var(--ink-soft); font-size: 14px; align-self: center; }
+.tile { background: var(--surface); border: 2px solid var(--navy); border-radius: 12px; padding: 10px 14px; font-size: 17px; line-height: 1.35; text-align: left; touch-action: none; user-select: none; -webkit-user-select: none; max-width: 100%; min-height: 44px; box-shadow: 0 2px 0 var(--line); }
+.tile.sel { background: var(--gold-soft); border-color: var(--gold); }
+.tile.ok { border-color: var(--good); background: var(--good-bg); }
+.tile.no { border-color: var(--try); background: var(--try-bg); }
+.tile.ghost { position: fixed; z-index: 30; pointer-events: none; opacity: .92; box-shadow: 0 8px 20px rgba(0,0,0,.25); }
+.bins { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.bin { border: 2px dashed var(--line); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 120px; background: var(--slot); }
+.bin > b { font-family: var(--font-display); font-weight: 600; font-size: 18px; color: var(--navy); }
+.bin.target, .slot.target { border-color: var(--gold); background: var(--gold-soft); }
+.slots { display: grid; gap: 10px; }
+.slotrow { display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 10px; align-items: center; }
+.slotrow > b { font-family: var(--font-display); font-weight: 600; font-size: 20px; color: var(--navy); }
+.slot { border: 2px dashed var(--line); border-radius: 12px; min-height: 56px; padding: 6px; display: flex; align-items: center; background: var(--slot); }
+.slot .ph { color: var(--ink-soft); font-size: 14px; padding: 0 8px; }
+.buildline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.buildline .slot { min-width: 180px; flex: 1 1 180px; }
+.sents { display: grid; gap: 8px; }
+.sent { text-align: left; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 14px; background: var(--surface); font-size: 18px; line-height: 1.6; }
+.sent.picked { border-color: var(--navy); background: var(--gold-soft); }
+.sent.ok { border-color: var(--good); background: var(--good-bg); }
+.sent.no { border-color: var(--try); background: var(--try-bg); }
+.choices { display: grid; gap: 8px; }
+.choice { text-align: left; display: flex; gap: 12px; align-items: flex-start; border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--surface); font-size: 17px; }
+.choice .mark { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--ink-soft); margin-top: 1px; }
+.choice.multi .mark { border-radius: 6px; }
+.choice.picked { border-color: var(--navy); background: var(--gold-soft); }
+.choice.picked .mark { background: var(--navy); border-color: var(--navy); box-shadow: inset 0 0 0 4px var(--gold-soft); }
+.choice.ok { border-color: var(--good); background: var(--good-bg); }
+.choice.no { border-color: var(--try); background: var(--try-bg); }
+.fb { font-size: 16px; margin: 0; min-height: 1.4em; font-weight: 500; }
+.fb.ok { color: var(--good); } .fb.no { color: var(--try); }
+.hear { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 999px; padding: 4px 12px 4px 8px; font-size: 14px; font-family: var(--font-body); vertical-align: middle; margin-left: 6px; min-height: 32px; }
+.hear svg { width: 18px; height: 18px; }
+.hear.playing { background: var(--gold); color: #1b1607; border-color: var(--gold); }
+.ttsbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: var(--gold-soft); border-radius: 12px; padding: 8px 12px; font-size: 15px; }
+.ttsbar select { width: auto; padding: 6px 10px; }
+.result { background: var(--good-bg); color: var(--good); border-radius: 12px; padding: 12px 14px; font-weight: 500; }
+.sign { max-width: 520px; }
+.teacher { border-style: dashed; }
+.lockhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.status { font-size: 14px; color: var(--ink-soft); }
+.status.ok { color: var(--good); }
+.rtable-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 12px; max-height: 360px; }
+.rtable { width: 100%; border-collapse: collapse; font-size: 15px; }
+.rtable th, .rtable td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.rtable th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; }
+.rtable td.band-ok { color: var(--good); font-weight: 600; } .rtable td.band-mid { color: var(--try); font-weight: 600; }
+.tsub { font-family: var(--font-display); font-weight: 600; font-size: 19px; color: var(--navy); margin: 6px 0 0; }
+details.sheetopt summary { cursor: pointer; font-weight: 500; color: var(--navy); }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--navy); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-family: var(--font-display); opacity: 0; transition: opacity .3s; pointer-events: none; max-width: calc(100% - 32px); text-align: center; z-index: 40; }
+.toast.show { opacity: 1; }
+@media (max-width: 560px) { .slotrow { grid-template-columns: 52px minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>Inference Practice</h1>
+    <div class="spacer"></div>
+    <span class="who" id="who" hidden></span>
+    <button class="linkish" id="switchStudent" hidden>Not you?</button>
+  </header>
+
+  <section class="card sign" id="signin">
+    <h2>Welcome, reader!</h2>
+    <p class="hint">Type your first name and last initial to start.</p>
+    <label class="q" for="studentName">Your name
+      <input type="text" id="studentName" maxlength="24" placeholder="Maya R." autocomplete="off">
+    </label>
+    <div class="row"><button class="btn gold" id="startBtn" disabled>Start</button></div>
+  </section>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Days" hidden></nav>
+  <main id="day" class="wrap" style="gap:16px" hidden></main>
+
+  <section class="card teacher" id="teacher" aria-labelledby="tTitle">
+    <div class="lockhead"><h3 id="tTitle">Teacher view</h3><button class="btn quiet" id="tToggle" type="button">Open</button></div>
+    <form id="pinForm" class="row" hidden>
+      <label class="q" for="pin" style="max-width:200px">Teacher password<input type="password" id="pin" maxlength="12" autocomplete="off"></label>
+      <button class="btn" type="submit">Unlock</button>
+      <span class="fb no" id="pinErr" hidden>That password didn’t match.</span>
+    </form>
+    <div id="tBody" hidden style="display:grid;gap:12px">
+      <h4 class="tsub">Student results on this iPad</h4>
+      <div class="rtable-wrap"><table class="rtable"><thead><tr><th>Student</th><th>Day</th><th>Score</th><th>What it means</th><th>Read-aloud</th><th>Turned in</th></tr></thead><tbody id="resultsBody"></tbody></table></div>
+      <div class="row">
+        <button class="btn gold" id="dlResults" type="button">Download results</button>
+        <button class="btn quiet" id="copyResults" type="button">Copy for Google Sheets</button>
+        <button class="btn quiet" id="clearResults" type="button">Clear results</button>
+        <span class="status" id="resStatus"></span>
+      </div>
+      <p class="hint">Download saves a spreadsheet file (with every answer) that opens in Google Sheets or Excel. Or tap Copy, open any Google Sheet, click cell A1 and paste. Do this on each iPad. Clear only after you’ve saved them.</p>
+      <h4 class="tsub">Text-to-speech accommodations</h4>
+      <label class="q" for="ttsList">Students with a text-to-speech accommodation (one name per line, typed the way they sign in)
+        <textarea id="ttsList" placeholder="Maya R.&#10;Jordan T."></textarea>
+      </label>
+      <div class="row"><button class="btn quiet" id="saveTts" type="button">Save accommodation list</button><span class="status" id="ttsStatus"></span></div>
+      <p class="hint">These students get “Hear it” read-aloud on everything, including the Friday check. Everyone else gets read-aloud on Days 1–4 and for Friday directions only.</p>
+      <h4 class="tsub">Password</h4>
+      <div class="row">
+        <label class="q" for="newPin" style="max-width:200px">New password<input type="password" id="newPin" maxlength="12" autocomplete="off"></label>
+        <button class="btn quiet" id="savePin" type="button">Change password</button>
+      </div>
+      <details class="sheetopt"><summary>Optional: send results to a Google Sheet automatically</summary>
+        <div style="display:grid;gap:12px;margin-top:10px">
+          <p class="hint" style="margin:0">Only works if your Google account lets you run Apps Script. School accounts often block it. If so, use Download results above.</p>
+          <label class="q" for="sheetUrl">Google Sheet web app link
+            <input type="url" id="sheetUrl" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off">
+          </label>
+          <div class="row"><button class="btn quiet" id="saveSheet" type="button">Save and send a test row</button><span class="status" id="sheetStatus">Not connected yet.</span></div>
+        </div>
+      </details>
+      <p class="hint">Settings and student work are saved on this iPad in Chrome. Clearing Chrome’s history or website data erases them, so download results each Friday.</p>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function () {
+  "use strict";
+  var P = {
+    bus: { title: "The Last Bus", paras: [
+      "Nia stared at the clock above the classroom door. Every few seconds, she glanced at her backpack, already zipped and sitting on her lap. Under her desk, her sneakers tapped the floor.",
+      "When the bell finally rang, Nia was the first one out the door. She raced down the hallway, dodging other students, and burst through the front doors. All she saw were yellow taillights turning the corner.",
+      "Nia’s shoulders dropped. She pulled out her phone, sighed, and texted her older brother for a ride. Then she sat down on the curb to wait.",
+      "Twenty minutes later, a blue car pulled up. Her brother leaned over and pushed the door open. He shook his head and asked if this was the third time this week, but he was smiling. Nia climbed in and thanked him. Tomorrow, she decided, she would ask her teacher if she could pack up a minute early."] },
+    rocks: { title: "The Mystery of the Moving Rocks", paras: [
+      "In Death Valley, California, there is a dry lakebed called Racetrack Playa. Scattered across its flat, cracked floor are rocks, some heavier than a person. Behind many of them stretch long trails in the dirt, as if the rocks had been sliding across the ground.",
+      "For many years, no one had ever seen the rocks move. Some people guessed that strong winds pushed them. Others blamed animals or even pranksters. Scientists measured the trails and argued about the answer, but no one could prove it.",
+      "In 2014, a team of scientists finally solved the mystery. They set up cameras and placed GPS trackers on some of the rocks. In winter, rain formed a shallow pond on the playa. At night, the water froze into thin sheets of ice. On sunny mornings, the ice cracked into large panels, and a light breeze pushed the panels across the pond. The floating ice shoved the rocks slowly through the soft mud.",
+      "The rocks moved only on a few winter mornings when everything was just right. Even then, they crept along at a few inches per second. It had taken months of patient watching to catch them in motion."] },
+    newkid: { title: "The New Kid", paras: [
+      "On his first morning at Lakeview Middle School, Theo stood outside room 214 for a long time. He read the room number three times, then checked his schedule again. Finally, he took a deep breath and opened the door.",
+      "Twenty-six faces turned to look at him. Theo felt his cheeks get hot. He slid into the only empty desk, in the back corner, and kept his eyes on his notebook for the rest of class.",
+      "At lunch, Theo carried his tray past table after table. He sat at the very end of a long table, as far from everyone as he could. A girl from his science class looked up and waved, but he pretended not to see her.",
+      "By Friday, things had changed. Theo walked into room 214 without stopping. At lunch, when the girl from science waved, he carried his tray straight to her table and sat down. Her name, he learned, was Priya."] }
+  };
+  function sentences(t) { return t.match(/[^.!?]+[.!?]+[”"]?/g).map(function (x) { return x.trim(); }); }
+  var PARAS = ["¶1", "¶2", "¶3", "¶4"];
+
+  var DAYS = [
+    { n: 1, label: "Day 1", sub: "Monday", title: "Clue or inference?", acts: [
+      { t: "remember" },
+      { t: "passage", p: "bus", label: "Passage 1" },
+      { t: "sort", id: "i1sort", prompt: "Drag each card. Does the text SAY it, or do you FIGURE IT OUT?", bins: ["Clue (the text says it)", "Inference (I figure it out)"], cards: [["Her sneakers tapped the floor.", 0], ["Nia was impatient for school to end.", 1], ["She was the first one out the door.", 0], ["Nia missed her bus.", 1], ["All she saw were yellow taillights turning the corner.", 0], ["Nia felt let down.", 1]], hint: "If you can point to the words in the passage, it is a clue. If you had to think it through, it is an inference." },
+      { t: "hot", id: "i1hot", p: "bus", para: 2, answer: 0, prompt: "Tap the sentence in ¶3 that shows Nia is disappointed.", hint: "Look for what Nia’s body does. People’s bodies show how they feel." },
+      { t: "mc", id: "i1mc", prompt: "Why did Nia rush out of the classroom?", c: ["She was afraid she would miss her bus.", "She was late for a test.", "She was angry at her teacher.", "She wanted to be first in the lunch line."], key: [0], hint: "Use ¶2 and ¶3. What did she see when she got outside, and who did she text?" }] },
+    { n: 2, label: "Day 2", sub: "Tuesday", title: "Clue + what I know", acts: [
+      { t: "passage", p: "bus", label: "Passage 1" },
+      { t: "match", id: "i2match", prompt: "Drag each inference to the clue that supports it.", targets: ["“her sneakers tapped”", "“yellow taillights”", "“shoulders dropped”", "“the third time this week”"], tiles: [["Nia was impatient.", 0], ["The bus had already left.", 1], ["Nia felt let down.", 2], ["Nia has missed the bus before.", 3]], hint: "Read each clue. Ask: what does this tell me that the text does not say?" },
+      { t: "build", id: "i2build", prompt: "Build an inference. Drag 3 pieces into order.", tiles: ["The text says her brother was smiling,", "and I know people smile when they are not really upset,", "so I can infer he is not mad at Nia.", "so Nia is in big trouble.", "and the car is blue,"], answer: [0, 1, 2], hint: "Clue first, then what you know, then the inference." },
+      { t: "mc", id: "i2a", step: "Part A", prompt: "What can the reader infer about Nia’s brother?", c: ["He is used to picking Nia up and does not mind helping her.", "He is angry that he had to leave work.", "He drives the school bus.", "He wants Nia to walk home."], key: [0], hint: "He asked a question, but how did he look when he asked it?" },
+      { t: "hot", id: "i2b", step: "Part B", p: "bus", para: 3, answer: 2, prompt: "Tap the sentence in ¶4 that best supports your Part A answer.", hint: "Find the sentence that shows how he acted when he picked her up." }] },
+    { n: 3, label: "Day 3", sub: "Wednesday", title: "Inferences in nonfiction", acts: [
+      { t: "passage", p: "rocks", label: "Passage 2" },
+      { t: "match", id: "i3match", prompt: "Drag each inference to the clue that supports it.", targets: ["“long trails in the dirt”", "“no one could prove it”", "“set up cameras and placed GPS trackers”", "“months of patient watching”"], tiles: [["The rocks had moved before.", 0], ["The mystery was hard to solve.", 1], ["The scientists planned carefully.", 2], ["The scientists did not give up.", 3]], hint: "Inferences work in nonfiction too. What does each clue tell you that the text does not say?" },
+      { t: "mc", id: "i3mc", prompt: "Why had no one seen the rocks move before 2014?", c: ["The rocks move only rarely, when the weather is just right.", "The rocks are too heavy to ever move.", "Pranksters moved them at night.", "The playa is always covered with water."], key: [0], hint: "Reread ¶4. When do the rocks move?" },
+      { t: "hot", id: "i3hot", p: "rocks", para: 3, answer: 0, prompt: "Tap the sentence in ¶4 that best supports your answer.", hint: "Find the sentence that tells WHEN the rocks move." }] },
+    { n: 4, label: "Day 4", sub: "Thursday", title: "Choose the best evidence", acts: [
+      { t: "passage", p: "rocks", label: "Passage 2" },
+      { t: "build", id: "i4build", prompt: "Build an inference. Drag 3 pieces into order.", tiles: ["The text says ice formed only on cold winter nights,", "and I know ice melts when it gets warm,", "so I can infer the rocks do not move in summer.", "so I can infer the rocks are magnetic.", "and I know rocks are gray,"], answer: [0, 1, 2], hint: "Clue, then what you know, then the inference. Which pieces are about ice?" },
+      { t: "mc", id: "i4multi", multi: 2, prompt: "Which TWO details support the inference that the rocks need just the right conditions to move? Choose two.", c: ["“rain formed a shallow pond on the playa”", "“At night, the water froze into thin sheets of ice”", "“some heavier than a person”", "“Some people guessed that strong winds pushed them”"], key: [0, 1], hint: "Look for the steps that had to happen first: water, then ice." },
+      { t: "mc", id: "i4mc", prompt: "What can you infer about the scientists from ¶3 and ¶4?", c: ["They were patient and used tools to see what people had missed.", "They moved the rocks themselves.", "They gave up after one winter.", "They believed animals moved the rocks."], key: [0], hint: "What did they set up, and how long did they watch?" }] },
+    { n: 5, label: "Day 5", sub: "Friday check", title: "Inference Check", check: true, acts: [
+      { t: "passage", p: "newkid", label: "Read", check: true },
+      { t: "mc", id: "g1a", pts: 1, step: "Question 1, Part A", prompt: "What can the reader infer about Theo by the end of the week?", c: ["He still wishes he could go back to his old school.", "He has started to feel comfortable and make friends.", "He has decided to sit alone every day.", "He is worried about his grades."], key: [1] },
+      { t: "hot", id: "g1b", pts: 1, step: "Question 1, Part B", p: "newkid", para: 3, answer: 2, prompt: "Tap the sentence in ¶4 that best supports your answer to Part A." },
+      { t: "mc", id: "g2", pts: 2, multi: 2, step: "Question 2", prompt: "Which TWO details best show that Theo feels nervous on his first day? Choose two.", c: ["“He read the room number three times”", "“Theo felt his cheeks get hot”", "“On his first morning at Lakeview Middle School”", "“Twenty-six faces turned to look at him”"], key: [0, 1] },
+      { t: "match", id: "g3", pts: 2, step: "Question 3", prompt: "Drag the inference that each paragraph best supports.", targets: ["¶3", "¶4"], tiles: [["Theo stays away from others because he feels out of place.", 0], ["Theo now feels like he belongs.", 1], ["Theo is upset about his grades.", -1], ["Theo wants to change schools.", -1]] }] }
+  ];
+
+  var $ = function (id) { return document.getElementById(id); };
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function store(k, v) { try { if (v === undefined) return JSON.parse(localStorage.getItem(k)); localStorage.setItem(k, JSON.stringify(v)); } catch (e) { return null; } }
+  var T = store("ci-teacher") || {}; if (!T.pin || T.pin === "1234") T.pin = "1234!"; T.tts = T.tts || []; T.queue = T.queue || []; T.sheetUrl = T.sheetUrl || ""; T.log = T.log || T.queue.filter(function (r) { return r.student && r.student.indexOf("TEST ROW") !== 0; });
+  function saveT() { store("ci-teacher", T); }
+  var student = store("inf-current") || "", A = {}, dayIdx = 0, curDay = null;
+  function loadA() { A = store("inf-work-" + student.toLowerCase()) || { done: {}, st: {} }; A.st = A.st || {}; A.done = A.done || {}; }
+  function saveA() { store("inf-work-" + student.toLowerCase(), A); }
+  function st(id) { return A.st[id] || (A.st[id] = { place: {}, pick: [], tries: 0, solved: false, firstTry: null }); }
+  var toastT; function toast(m) { var t = $("toast"); t.textContent = m; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove("show"); }, 2400); }
+
+  // ---------- Voice ----------
+  var voice = null;
+  function pickVoice() { try { var vs = speechSynthesis.getVoices() || []; voice = vs.filter(function (v) { return v.name === "Google US English"; })[0] || vs.filter(function (v) { return /google/i.test(v.name) && /^en/i.test(v.lang); })[0] || null; } catch (e) {} }
+  try { pickVoice(); speechSynthesis.addEventListener("voiceschanged", pickVoice); } catch (e) {}
+  function speak(t, r) { try { speechSynthesis.cancel(); var u = new SpeechSynthesisUtterance(t); u.lang = "en-US"; u.rate = r || rate(); if (voice) u.voice = voice; speechSynthesis.speak(u); } catch (e) {} }
+  var SPK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+  function hasTTS() { var n = (student || "").trim().toLowerCase(); return T.tts.some(function (x) { return x.trim().toLowerCase() === n; }); }
+  function rate() { return Number(A.rate) || .9; }
+  function canHear() { return !curDay || !curDay.check || hasTTS(); }
+  function H(text, force) { return (force || canHear()) ? '<button class="hear" type="button" data-say="' + esc(text) + '" aria-label="Hear it">' + SPK + "Hear it</button>" : ""; }
+
+  // ---------- Sign in ----------
+  $("studentName").addEventListener("input", function () { $("startBtn").disabled = !this.value.trim(); });
+  $("studentName").addEventListener("keydown", function (e) { if (e.key === "Enter" && this.value.trim()) $("startBtn").click(); });
+  $("startBtn").addEventListener("click", function () { student = $("studentName").value.trim(); store("inf-current", student); begin(); });
+  $("switchStudent").addEventListener("click", function () { student = ""; store("inf-current", ""); show(false); $("studentName").value = ""; $("startBtn").disabled = true; $("studentName").focus(); });
+  function show(on) { $("signin").hidden = on; $("tabs").hidden = !on; $("day").hidden = !on; $("who").hidden = !on; $("switchStudent").hidden = !on; }
+  function begin() { loadA(); show(true); $("who").textContent = "Reading: " + student; var first = DAYS.findIndex(function (d) { return !A.done[d.n]; }); dayIdx = first < 0 ? 4 : first; renderTabs(); renderDay(); }
+  function renderTabs() {
+    $("tabs").innerHTML = DAYS.map(function (d, i) {
+      return '<button class="tab" role="tab" type="button" data-i="' + i + '" aria-selected="' + (i === dayIdx) + '"><b>' + d.label + "</b><span>" + d.sub + "</span>" + (A.done[d.n] ? '<span class="done">✓ Turned in</span>' : "") + "</button>";
+    }).join("");
+    $("tabs").querySelectorAll(".tab").forEach(function (b) { b.addEventListener("click", function () { dayIdx = Number(b.dataset.i); renderTabs(); renderDay(); window.scrollTo(0, 0); }); });
+  }
+
+  // ---------- Activity renderers ----------
+  function head(a, title) { return (a.step ? '<span class="step">' + esc(a.step) + "</span>" : "") + "<h3>" + esc(title || a.prompt) + H(a.prompt + (a.c ? " " + a.c.join(". ") : "")) + "</h3>"; }
+  function checkRow(a) { return curDay.check ? "" : '<div class="row"><button class="btn" type="button" data-check="' + a.id + '">Check</button><p class="fb" id="fb-' + a.id + '"></p></div>'; }
+  function tileHTML(a, i, text) { return '<button type="button" class="tile" data-act="' + a.id + '" data-tile="' + i + '">' + esc(text) + "</button>"; }
+  function render(a) {
+    if (a.t === "remember") return '<section class="card remember"><h3>Remember' + H("An inference is something you figure out. Clue from the text, plus what I know, equals an inference. The author does not say it. You use clues to figure it out.") + '</h3><div><b>Clue</b> (what the text says) + <b>What I know</b> = <b>Inference</b> (what I figure out).<br>The author does not say it. You use clues to figure it out.</div></section>';
+    if (a.t === "passage") {
+      var p = P[a.p], can = canHear();
+      return '<section class="card passage"><div class="passage-title"><h2>' + esc(a.label + ": " + p.title) + "</h2>" + (can ? '<button class="btn quiet" type="button" data-readall="' + a.p + '">Hear the whole passage</button>' : '<span class="hint">Read this passage on your own.</span>') + "</div>" + (can ? '<p class="hint">Tap any word to hear it.</p>' : "") +
+        p.paras.map(function (t, i) { return '<p><span class="pnum">¶' + (i + 1) + "</span>" + (can ? t.split(/\s+/).map(function (w) { return '<span class="w">' + esc(w) + "</span>"; }).join(" ") : esc(t)) + "</p>"; }).join("") + "</section>";
+    }
+    var s = st(a.id), h = '<section class="card" id="act-' + a.id + '">' + head(a);
+    if (a.t === "sort" || a.t === "match" || a.t === "build") {
+      var tiles = a.t === "build" ? a.tiles : a.cards ? a.cards.map(function (c) { return c[0]; }) : a.tiles.map(function (c) { return c[0]; });
+      var inBank = tiles.map(function (_, i) { return i; }).filter(function (i) { return s.place[i] == null; });
+      h += '<p class="hint">Drag a card, or tap a card and then tap where it goes.' + (a.t !== "sort" ? " Tap a placed card to take it back." : "") + "</p>";
+      h += '<div class="bank' + (inBank.length ? "" : " empty") + '" data-drop="' + a.id + '" data-key="bank">' + inBank.map(function (i) { return tileHTML(a, i, tiles[i]); }).join("") + "</div>";
+      if (a.t === "sort") {
+        h += '<div class="bins">' + a.bins.map(function (b, bi) { return '<div class="bin" data-drop="' + a.id + '" data-key="' + bi + '"><b>' + esc(b) + "</b>" + tiles.map(function (t, i) { return s.place[i] === bi ? tileHTML(a, i, t) : ""; }).join("") + "</div>"; }).join("") + "</div>";
+      } else if (a.t === "match") {
+        h += '<div class="slots">' + a.targets.map(function (lab, ti) { var at = Object.keys(s.place).filter(function (k) { return s.place[k] === ti; })[0]; return '<div class="slotrow"><b>' + esc(lab) + '</b><div class="slot" data-drop="' + a.id + '" data-key="' + ti + '">' + (at != null ? tileHTML(a, Number(at), tiles[at]) : '<span class="ph">Drop here</span>') + "</div></div>"; }).join("") + "</div>";
+      } else {
+        h += '<div class="buildline">' + a.answer.map(function (_, si) { var at = Object.keys(s.place).filter(function (k) { return s.place[k] === si; })[0]; return '<div class="slot" data-drop="' + a.id + '" data-key="' + si + '">' + (at != null ? tileHTML(a, Number(at), tiles[at]) : '<span class="ph">Piece ' + (si + 1) + "</span>") + "</div>"; }).join("") + "</div>";
+      }
+    }
+    if (a.t === "hot") {
+      h += '<div class="sents">' + sentences(P[a.p].paras[a.para]).map(function (x, i) { return '<button type="button" class="sent' + (s.pick[0] === i ? " picked" : "") + '" data-hot="' + a.id + '" data-i="' + i + '">' + esc(x) + "</button>"; }).join("") + "</div>";
+    }
+    if (a.t === "mc") {
+      var order = a.c.map(function (_, i) { return i; }), sh = a.id.split("").reduce(function (n, ch) { return n + ch.charCodeAt(0); }, 0) % a.c.length; order = order.slice(sh).concat(order.slice(0, sh));
+      h += '<div class="choices">' + order.map(function (i) { var c = a.c[i]; return '<button type="button" class="choice' + (a.multi ? " multi" : "") + (s.pick.indexOf(i) >= 0 ? " picked" : "") + '" data-mc="' + a.id + '" data-i="' + i + '" aria-pressed="' + (s.pick.indexOf(i) >= 0) + '"><span class="mark"></span><span>' + esc(c) + "</span></button>"; }).join("") + "</div>";
+    }
+    return h + checkRow(a) + "</section>";
+  }
+  function find(id) { var r = null; DAYS.forEach(function (d) { d.acts.forEach(function (a) { if (a.id === id) r = a; }); }); return r; }
+  function correctParts(a) {
+    var s = st(a.id);
+    if (a.t === "sort") return a.cards.map(function (c, i) { return s.place[i] === c[1]; });
+    if (a.t === "match") return a.targets.map(function (_, ti) { var at = Object.keys(s.place).filter(function (k) { return s.place[k] === ti; })[0]; return at != null && a.tiles[at][1] === ti; });
+    if (a.t === "build") return a.answer.map(function (want, si) { var at = Object.keys(s.place).filter(function (k) { return s.place[k] === si; })[0]; return at != null && Number(at) === want; });
+    if (a.t === "hot") return [s.pick[0] === a.answer];
+    if (a.t === "mc") return a.multi ? a.key.map(function (k) { return s.pick.indexOf(k) >= 0; }).concat(s.pick.length <= a.multi ? [] : [false]) : [s.pick.length === 1 && s.pick[0] === a.key[0]];
+    return [true];
+  }
+  function complete(a) {
+    var s = st(a.id);
+    if (a.t === "sort") return Object.keys(s.place).length === a.cards.length;
+    if (a.t === "match") return Object.keys(s.place).filter(function (k) { return s.place[k] != null; }).length >= a.targets.length;
+    if (a.t === "build") return Object.keys(s.place).filter(function (k) { return s.place[k] != null; }).length >= a.answer.length;
+    if (a.t === "mc") return s.pick.length === (a.multi || 1);
+    if (a.t === "hot") return s.pick.length === 1;
+    return true;
+  }
+  function rerender(a) { var el = $("act-" + a.id); if (!el) return; var tmp = document.createElement("div"); tmp.innerHTML = render(a); el.replaceWith(tmp.firstElementChild); bindAct(a); progress(); }
+
+  // ---------- Placing (drag or tap) ----------
+  var selected = null; // {act, tile}
+  function place(a, tile, key) {
+    var s = st(a.id);
+    if (key === "bank") { delete s.place[tile]; }
+    else {
+      key = Number(key);
+      if (a.t !== "sort") Object.keys(s.place).forEach(function (k) { if (s.place[k] === key && Number(k) !== tile) delete s.place[k]; });
+      s.place[tile] = key;
+    }
+    s.solved = false; saveA(); selected = null; rerender(a);
+  }
+  function bindAct(a) {
+    var root = $("act-" + a.id); if (!root) return;
+    root.querySelectorAll("[data-say]").forEach(bindSay);
+    root.querySelectorAll(".tile").forEach(function (t) {
+      var tile = Number(t.dataset.tile), startX = 0, startY = 0, ghost = null, moved = false, over = null;
+      t.addEventListener("pointerdown", function (e) { if (curDayLocked()) return; startX = e.clientX; startY = e.clientY; moved = false; try { t.setPointerCapture(e.pointerId); } catch (x) {} });
+      t.addEventListener("pointermove", function (e) {
+        if (!t.hasPointerCapture || !t.hasPointerCapture(e.pointerId)) return;
+        if (!moved && Math.hypot(e.clientX - startX, e.clientY - startY) < 8) return;
+        if (!moved) { moved = true; ghost = t.cloneNode(true); ghost.classList.add("ghost"); ghost.style.width = t.offsetWidth + "px"; document.body.appendChild(ghost); t.style.opacity = ".35"; }
+        ghost.style.left = (e.clientX - t.offsetWidth / 2) + "px"; ghost.style.top = (e.clientY - 22) + "px";
+        if (e.clientY < 70) window.scrollBy(0, -14); else if (e.clientY > window.innerHeight - 70) window.scrollBy(0, 14);
+        var el = document.elementFromPoint(e.clientX, e.clientY), d = el && el.closest("[data-drop]");
+        if (over && over !== d) over.classList.remove("target");
+        over = d && d.dataset.drop === a.id ? d : null; if (over) over.classList.add("target");
+      });
+      t.addEventListener("pointerup", function (e) {
+        if (moved) {
+          if (ghost) ghost.remove(); t.style.opacity = ""; if (over) over.classList.remove("target");
+          if (over) place(a, tile, over.dataset.key);
+          return;
+        }
+        // tap
+        if (curDayLocked()) return;
+        var inBank = !!t.closest('[data-key="bank"]'), box = t.closest("[data-drop]");
+        if (selected && selected.act === a.id && selected.tile !== tile && box && !inBank) { place(a, selected.tile, box.dataset.key); return; }
+        if (!inBank && a.t !== "sort") { place(a, tile, "bank"); return; }
+        if (selected && selected.act === a.id && selected.tile === tile) { selected = null; t.classList.remove("sel"); return; }
+        root.querySelectorAll(".tile.sel").forEach(function (x) { x.classList.remove("sel"); });
+        selected = { act: a.id, tile: tile }; t.classList.add("sel");
+        if (canHear() && hasTTS()) speak(t.textContent);
+      });
+      t.addEventListener("pointercancel", function () { if (ghost) ghost.remove(); t.style.opacity = ""; });
+    });
+    root.querySelectorAll("[data-drop]").forEach(function (d) {
+      d.addEventListener("click", function (e) { if (e.target.closest(".tile")) return; if (selected && selected.act === a.id) place(a, selected.tile, d.dataset.key); });
+    });
+    root.querySelectorAll("[data-hot]").forEach(function (b) { b.addEventListener("click", function () { if (curDayLocked()) return; var s = st(a.id); s.pick = [Number(b.dataset.i)]; s.solved = false; saveA(); rerender(a); if (hasTTS() || !curDay.check) speak(b.textContent); }); });
+    root.querySelectorAll("[data-mc]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (curDayLocked()) return;
+        var s = st(a.id), i = Number(b.dataset.i);
+        if (a.multi) { var at = s.pick.indexOf(i); if (at >= 0) s.pick.splice(at, 1); else if (s.pick.length < a.multi) s.pick.push(i); else { toast("Choose only " + a.multi + ". Tap one to unselect it."); return; } }
+        else s.pick = [i];
+        s.solved = false; saveA(); rerender(a);
+      });
+    });
+    var cb = root.querySelector("[data-check]");
+    if (cb) cb.addEventListener("click", function () {
+      var s = st(a.id), fb = $("fb-" + a.id);
+      if (!complete(a)) { fb.className = "fb no"; fb.textContent = "Finish placing or choosing first."; return; }
+      var parts = correctParts(a), ok = parts.every(Boolean);
+      s.tries++; if (s.firstTry === null) s.firstTry = ok; s.solved = ok; saveA();
+      markParts(a, parts);
+      fb.className = "fb " + (ok ? "ok" : "no");
+      fb.textContent = ok ? ["Nice work!", "You got it!", "Great thinking!", "Yes! That’s it."][s.tries % 4] : "Not yet. " + (a.hint || "Try again.");
+      if (!ok && canHear() && a.hint) speak("Not yet. " + a.hint);
+      progress();
+    });
+  }
+  function markParts(a, parts) {
+    var root = $("act-" + a.id), s = st(a.id);
+    if (a.t === "sort") root.querySelectorAll(".bin .tile").forEach(function (t) { t.classList.add(parts[Number(t.dataset.tile)] ? "ok" : "no"); });
+    if (a.t === "match" || a.t === "build") root.querySelectorAll(".slot").forEach(function (sl) { var t = sl.querySelector(".tile"); if (t) t.classList.add(parts[Number(sl.dataset.key)] ? "ok" : "no"); });
+    if (a.t === "hot") root.querySelectorAll(".sent.picked").forEach(function (b) { b.classList.add(parts[0] ? "ok" : "no"); });
+    if (a.t === "mc") root.querySelectorAll(".choice.picked").forEach(function (b) { var i = Number(b.dataset.i); b.classList.add(a.key.indexOf(i) >= 0 ? "ok" : "no"); });
+  }
+  function curDayLocked() { return false; }
+  function bindSay(b) { b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); document.querySelectorAll(".hear.playing").forEach(function (x) { x.classList.remove("playing"); }); b.classList.add("playing"); speak(b.dataset.say); setTimeout(function () { b.classList.remove("playing"); }, 1500); }); }
+
+  function scorable(d) { return d.acts.filter(function (a) { return ["sort", "match", "build", "hot", "mc"].indexOf(a.t) >= 0; }); }
+  function progress() {
+    var d = curDay, acts = scorable(d), done = acts.filter(function (a) { return d.check ? complete(a) : st(a.id).solved; }).length, el = $("progText"), bar = $("progBar");
+    if (el) el.textContent = done + " of " + acts.length + (d.check ? " answered" : " done");
+    if (bar) bar.style.width = Math.round(done / acts.length * 100) + "%";
+  }
+  function renderDay() {
+    var d = DAYS[dayIdx], root = $("day"); curDay = d;
+    var acts = scorable(d);
+    root.innerHTML = '<section class="card" style="background:transparent;border:0;padding:4px 0;gap:8px"><h2 style="font-size:28px">' + esc(d.label + ": " + d.title) + "</h2>" +
+      '<div class="prog"><div class="bar"><i id="progBar" style="width:0%"></i></div><span id="progText"></span></div>' +
+      (d.check ? '<p class="hint">Work on your own. Answer all questions, then turn in your check. ' + H("Directions. Read the passage, then answer all the questions on your own. When you are done, turn in your check.", true) + "</p>" : "") +
+      (hasTTS() ? '<div class="ttsbar"><b>Text-to-speech is on.</b> Tap “Hear it” on anything. <label for="rateSel">Speed</label><select id="rateSel"><option value=".75"' + (rate() < .85 ? " selected" : "") + '>Slower</option><option value=".9"' + (rate() >= .85 && rate() < 1 ? " selected" : "") + '>Normal</option><option value="1.05"' + (rate() >= 1 ? " selected" : "") + ">Faster</option></select></div>" : "") + "</section>" +
+      d.acts.map(render).join("") +
+      '<section class="card"><div class="row"><button class="btn gold" type="button" id="submitDay">' + (d.check ? "Turn in my check" : "Turn in " + d.label) + '</button><span class="status' + (A.done[d.n] ? " ok" : "") + '" id="dayStatus">' + (A.done[d.n] ? "✓ Turned in. You can update and turn in again." : "Your work saves on this device.") + '</span></div><div id="resultBox"></div></section>';
+    root.querySelectorAll("[data-say]").forEach(function (b) { if (!b.closest("[id^='act-']")) bindSay(b); });
+    d.acts.forEach(bindAct);
+    root.querySelectorAll("[data-readall]").forEach(function (b) { b.addEventListener("click", function () { speak(P[b.dataset.readall].paras.join(" ")); }); });
+    root.querySelectorAll(".w").forEach(function (s) { s.addEventListener("click", function () { speak(s.textContent.replace(/[^A-Za-z0-9’'-]/g, ""), rate() * .9); s.classList.add("say"); setTimeout(function () { s.classList.remove("say"); }, 800); }); });
+    var rs = $("rateSel"); if (rs) rs.addEventListener("change", function () { A.rate = Number(rs.value); saveA(); speak("This is the new reading speed."); });
+    $("submitDay").addEventListener("click", function () { turnIn(d); });
+    progress();
+  }
+
+  // ---------- Turn in + Google Sheet ----------
+  function fridayScore() {
+    var tot = 0;
+    scorable(DAYS[4]).forEach(function (a) { var parts = correctParts(a); if (a.t === "mc" && a.multi) { var s = st(a.id); tot += s.pick.length > a.multi ? 0 : parts.slice(0, a.key.length).filter(Boolean).length; } else tot += parts.filter(Boolean).length; });
+    return tot;
+  }
+  function summary(d) {
+    var out = {};
+    scorable(d).forEach(function (a) {
+      var s = st(a.id), name = (a.step ? a.step + ": " : "") + a.prompt.slice(0, 60);
+      if (d.check) out[name] = correctParts(a).filter(Boolean).length + " of " + (a.pts || 1);
+      else out[name] = s.solved ? (s.firstTry ? "Correct first try" : "Correct after " + s.tries + " tries") : (s.tries ? "Not yet (" + s.tries + " tries)" : "Not tried");
+    });
+    return out;
+  }
+  function post(row) { return fetch(T.sheetUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(row) }); }
+  function flush(cb) {
+    if (!T.sheetUrl || !T.queue.length) { cb && cb(false); return; }
+    var batch = T.queue.slice(); T.queue = []; saveT();
+    batch.reduce(function (p, r) { return p.then(function () { return post(r); }); }, Promise.resolve()).then(function () { cb && cb(true); }).catch(function () { T.queue = batch.concat(T.queue); saveT(); cb && cb(false); });
+  }
+  function turnIn(d) {
+    var acts = scorable(d);
+    if (d.check && !acts.every(complete)) { toast("Answer every question first"); return; }
+    if (!d.check && !acts.some(function (a) { return st(a.id).tries > 0; })) { toast("Try at least one activity first"); return; }
+    var row = { kit: "inference", student: student, day: "Inference – " + d.label + " (" + d.sub + ")", tts: hasTTS() ? "Yes" : "No", responses: summary(d), sentAt: new Date().toISOString() };
+    if (d.check) { row.score = fridayScore(); row.outOf = 6; }
+    else { row.score = acts.filter(function (a) { return st(a.id).firstTry === true; }).length; row.outOf = acts.length; row.firstTry = true; }
+    var fresh = store("ci-teacher"); if (fresh) { T.log = fresh.log || T.log; T.queue = fresh.queue || T.queue; T.tts = fresh.tts || T.tts; T.sheetUrl = fresh.sheetUrl || T.sheetUrl; }
+    T.log.push(row); if (T.sheetUrl) T.queue.push(row); saveT(); A.done[d.n] = true; saveA();
+    var s = $("dayStatus"); s.className = "status ok"; s.textContent = "✓ Turned in. You can update and turn in again.";
+    $("resultBox").innerHTML = '<p class="result">' + (d.check ? "You turned in your check! Your teacher will look at your answers." : "Great work today! " + acts.filter(function (a) { return st(a.id).solved; }).length + " of " + acts.length + " activities finished.") + "</p>";
+    renderTabs();
+    flush(function (ok) { if (T.sheetUrl) toast(ok ? "Sent to your teacher" : "Saved. It will send next time."); });
+  }
+
+  // ---------- Teacher ----------
+  var unlocked = false;
+  function band(r) { if (r.outOf !== 6) return r.score === undefined ? "" : "Correct on first try"; return r.score >= 5 ? "On track (5-6)" : r.score >= 3 ? "Growing (3-4)" : "Needs more support (0-2)"; }
+  function when(r) { try { var t = new Date(r.sentAt); return t.toLocaleDateString(undefined, { month: "short", day: "numeric" }) + " " + t.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" }); } catch (e) { return ""; } }
+  function esc(x) { return String(x == null ? "" : x).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function renderResults() {
+    var rows = T.log.slice().reverse();
+    $("resultsBody").innerHTML = rows.length ? rows.map(function (r) { var b = band(r); return "<tr><td>" + esc(r.student) + "</td><td>" + esc(r.day) + "</td><td>" + (r.score === undefined ? "" : r.score + " / " + r.outOf) + '</td><td class="' + (/On track/.test(b) ? "band-ok" : /Growing|Needs/.test(b) ? "band-mid" : "") + '">' + esc(b) + "</td><td>" + esc(r.tts) + "</td><td>" + esc(when(r)) + "</td></tr>"; }).join("") : '<tr><td colspan="6">No work turned in on this iPad yet.</td></tr>';
+    $("resStatus").textContent = rows.length ? rows.length + " turned in" : "";
+  }
+  function table(sep) {
+    var head = ["Date & time", "Student", "Day", "Score", "Out of", "What the score means", "Text-to-speech", "Details"];
+    var body = T.log.map(function (r) { var det = Object.keys(r.responses || {}).map(function (k) { return k + ": " + r.responses[k]; }).join(sep === "," ? "\n" : " | "); return [when(r), r.student, r.day, r.score === undefined ? "" : r.score, r.outOf || "", band(r), r.tts, det]; });
+    return [head].concat(body).map(function (row) { return row.map(function (c) { c = String(c == null ? "" : c); if (sep === ",") return /[",\n]/.test(c) ? '"' + c.replace(/"/g, '""') + '"' : c; return c.replace(/[\t\n]/g, " "); }).join(sep); }).join(sep === "," ? "\r\n" : "\n");
+  }
+  $("dlResults").addEventListener("click", function () {
+    if (!T.log.length) { toast("No results on this iPad yet"); return; }
+    var d = new Date(), name = "practice-results-" + d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2) + ".csv";
+    var blob = new Blob(["﻿" + table(",")], { type: "text/csv" }), url = URL.createObjectURL(blob), a = document.createElement("a");
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    toast("Saved " + name);
+  });
+  $("copyResults").addEventListener("click", function () {
+    if (!T.log.length) { toast("No results on this iPad yet"); return; }
+    var txt = table("\t"), done = function () { toast("Copied. Click cell A1 in a Google Sheet and paste."); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback();
+    function fallback() { var ta = document.createElement("textarea"); ta.value = txt; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("Couldn’t copy. Use Download instead."); } ta.remove(); }
+  });
+  $("clearResults").addEventListener("click", function () {
+    if (!T.log.length) return;
+    if (!confirm("Clear all " + T.log.length + " results from this iPad? Download them first if you haven’t.")) return;
+    T.log = []; saveT(); renderResults(); toast("Results cleared");
+  });
+  function renderLock() { $("pinForm").hidden = unlocked || $("tToggle").dataset.open !== "true"; $("tBody").hidden = !unlocked; $("tToggle").textContent = unlocked ? "Lock" : ($("tToggle").dataset.open === "true" ? "Cancel" : "Open"); }
+  $("tToggle").addEventListener("click", function () { if (unlocked) { unlocked = false; this.dataset.open = "false"; } else this.dataset.open = this.dataset.open === "true" ? "false" : "true"; $("pin").value = ""; $("pinErr").hidden = true; renderLock(); if (!$("pinForm").hidden) $("pin").focus(); });
+  $("pinForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    if ($("pin").value === T.pin) { unlocked = true; $("sheetUrl").value = T.sheetUrl; $("ttsList").value = T.tts.join("\n"); renderResults(); $("sheetStatus").textContent = T.sheetUrl ? "Connected. " + (T.queue.length ? T.queue.length + " waiting to send." : "Everything sent.") : "Not connected yet."; renderLock(); }
+    else { $("pinErr").hidden = false; $("pin").value = ""; }
+  });
+  $("saveSheet").addEventListener("click", function () {
+    var u = $("sheetUrl").value.trim();
+    if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)) { $("sheetStatus").textContent = "The link should start with https://script.google.com/"; return; }
+    T.sheetUrl = u; T.queue.unshift({ kit: "inference", student: "TEST ROW (you can delete this)", day: "Test", tts: "", responses: {}, sentAt: new Date().toISOString() }); saveT();
+    $("sheetStatus").textContent = "Sending…";
+    flush(function (ok) { $("sheetStatus").textContent = ok ? "Sent a test row. Check your sheet." : "Couldn’t reach the sheet. Rows will send next time."; });
+  });
+  $("saveTts").addEventListener("click", function () { T.tts = $("ttsList").value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean); saveT(); $("ttsStatus").textContent = "Saved: " + T.tts.length + " student" + (T.tts.length === 1 ? "" : "s") + "."; if (!$("day").hidden) renderDay(); });
+  $("savePin").addEventListener("click", function () { var p = $("newPin").value.trim(); if (p.length < 4 || p.length > 12) { toast("Use 4 to 12 characters for the password"); return; } T.pin = p; saveT(); $("newPin").value = ""; toast("Password changed"); });
+  renderLock();
+  if (student) begin(); else show(false);
+})();
+</script>
+
+</body></html>
